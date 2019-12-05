@@ -1,0 +1,78 @@
+{
+  "@@locale": "ja",
+  "@@last_modified": "2019-10-23T17:52:16.885622",
+  "Working": "作業中",
+  "@Working": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Working Duration": "作業時間",
+  "@Working Duration": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Breaking": "休憩中",
+  "@Breaking": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Breaking Duration": "休憩時間",
+  "@Breaking Duration": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Reset": "リセット",
+  "@Reset": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Settings": "設定",
+  "@Settings": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "minutes": "{minutes}分",
+  "@minutes": {
+    "type": "text",
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "selectDurationOf": "{durationMessage}を選択",
+  "@selectDurationOf": {
+    "type": "text",
+    "placeholders": {
+      "durationMessage": {}
+    }
+  },
+  "Your Performance": "あなたの作業時間",
+  "@Your Performance": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Today": "今日",
+  "@Today": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Seven Days": "７日間",
+  "@Seven Days": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "This Month": "今月",
+  "@This Month": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Show All Logs": "すべての記録を見る",
+  "@Show All Logs": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Logs will be kept for a period of one year.": "記録は一年間保存されます。",
+  "@Logs will be kept for a period of one year.": {
+    "type": "text",
+    "placeholders": {}
+  }
+}

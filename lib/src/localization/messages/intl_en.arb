@@ -1,0 +1,78 @@
+{
+  "@@locale": "en",
+  "@@last_modified": "2019-10-23T17:52:16.885622",
+  "Working": "Working",
+  "@Working": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Working Duration": "Working Duration",
+  "@Working Duration": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Breaking": "Breaking",
+  "@Breaking": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Breaking Duration": "Breaking Duration",
+  "@Breaking Duration": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Reset": "Reset",
+  "@Reset": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Settings": "Settings",
+  "@Settings": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "minutes": "{minutes} minutes",
+  "@minutes": {
+    "type": "text",
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "selectDurationOf": "Select {durationMessage}",
+  "@selectDurationOf": {
+    "type": "text",
+    "placeholders": {
+      "durationMessage": {}
+    }
+  },
+  "Your Performance": "Your Performance",
+  "@Your Performance": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Today": "Today",
+  "@Today": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Seven Days": "Seven Days",
+  "@Seven Days": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "This Month": "This Month",
+  "@This Month": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Show All Logs": "Show All Logs",
+  "@Show All Logs": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Logs will be kept for a period of one year.": "Logs will be kept for a period of one year.",
+  "@Logs will be kept for a period of one year.": {
+    "type": "text",
+    "placeholders": {}
+  }
+}

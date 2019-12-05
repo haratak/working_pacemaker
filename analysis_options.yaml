@@ -1,0 +1,17 @@
+include: package:pedantic/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - lib/src/localization/generated/**
+
+linter:
+  rules:
+    - directives_ordering
+    - sort_pub_dependencies
+    - prefer_final_fields
+    - prefer_final_in_for_each
+    - prefer_final_locals
+    - cancel_subscriptions
+#    - close_sinks
+    - prefer_const_constructors
+    - prefer_const_literals_to_create_immutables
