@@ -74,7 +74,7 @@ class App extends StatelessWidget {
               RouteName.root: (context) {
                 return MultiProvider(providers: [
                   ProxyProvider<AppRootModules, HomePageSubject>(
-                    builder: (_, m, __) {
+                    update: (_, m, __) {
                       return HomePageSubject(
                           pacemaker: m.pacemaker, analytics: m.analytics);
                     },
@@ -83,7 +83,7 @@ class App extends StatelessWidget {
                     },
                   ),
                   ProxyProvider<AppRootModules, TimerFaceSubject>(
-                    builder: (_, m, __) {
+                    update: (_, m, __) {
                       return TimerFaceSubject(
                           pacemaker: m.pacemaker,
                           messages: AppMessages(locale(context)));
@@ -95,9 +95,8 @@ class App extends StatelessWidget {
                 ], child: HomePage());
               },
               RouteName.settings: (context) {
-                return Provider<SettingsPageSubject>(
-                  builder: (_) {
-                    final m = Provider.of<AppRootModules>(context);
+                return ProxyProvider<AppRootModules, SettingsPageSubject>(
+                  update: (_, m, __) {
                     return SettingsPageSubject(
                         pacemakerSettings: m.pacemakerSettings,
                         messages: AppMessages(locale(context)));
@@ -109,9 +108,8 @@ class App extends StatelessWidget {
                 );
               },
               RouteName.performance_log: (context) {
-                return Provider<PerformanceLogPageSubject>(
-                  builder: (_) {
-                    final m = Provider.of<AppRootModules>(context);
+                return ProxyProvider<AppRootModules, PerformanceLogPageSubject>(
+                  update: (_, m, __) {
                     return PerformanceLogPageSubject(
                         performanceLogReader:
                             performance_logging.LogReader(storage: m.storage),
