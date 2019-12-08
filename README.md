@@ -16,6 +16,8 @@ flutter run --target='lib/main_dev.dart'
 flutter run --target='lib/main_production.dart'
 ```
 
+**A `google-services.json` for Firebase is required to run.**
+
 ## For Web
 
 **Flutter master branch may be necessary for building this app.**
