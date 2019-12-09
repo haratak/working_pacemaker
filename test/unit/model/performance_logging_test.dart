@@ -1,5 +1,5 @@
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:quiver/collection.dart';
 import 'package:quiver/iterables.dart';
 import 'package:test/test.dart';
 import 'package:working_pacemaker/dev_scripts/dev_platform.dart';
@@ -72,11 +72,11 @@ main() {
         });
       });
 
-      test('Insert log (when storage value is not null).', () async {
+      test('Add log (when storage value is not null).', () async {
         logger.now = DateTime(2020, 1, 1);
         logger.onWorkingPhaseIsFinished.add(const Duration(minutes: 25));
         // Wait for it will be logged.
-        await Future.delayed(Duration.zero, () {});
+        await Future.delayed(Duration.zero);
 
         logger.now = DateTime(2020, 1, 1, 6);
         logger.onWorkingPhaseIsFinished.add(const Duration(minutes: 50));
@@ -95,6 +95,8 @@ main() {
     _LogReaderWithFakeNow logReader;
     DevPerformanceLogRepository repository;
     final generator = PerformanceLogDataSetGenerator();
+    bool areLogsSorted(List<PerformanceLog> logs) => range(1, logs.length)
+        .every((i) => logs[i - 1].finishedTime.isBefore(logs[i].finishedTime));
 
     setUp(() {
       logReader = _LogReaderWithFakeNow(storage: storage);
@@ -108,11 +110,11 @@ main() {
           lessThanOrEqualTo(const Duration(milliseconds: 1)));
     });
 
-    group('listOfToday.', () {
+    group('listOfADay.', () {
       group('With no data set.', () {
         test('Empty Logs.', () async {
           logReader.now = DateTime.now();
-          final result = await logReader.getDailyPerformanceLog(logReader.now);
+          final result = await logReader.listOfADay(logReader.now);
           expect(result, isEmpty);
         });
       });
@@ -126,39 +128,29 @@ main() {
           await repository.set(logReader.now, dataSet);
         });
         test('Logs are all today\'s one.', () async {
-          final result = await logReader.getDailyPerformanceLog(logReader.now);
+          final result = await logReader.listOfADay(logReader.now);
+
+          expect(result, isNotEmpty);
+
           expect(
               result.every((log) => log.finishedTime.day == logReader.now.day),
               isTrue);
         });
         test('Logs are sorted by finishedTime ascendant order.', () async {
-          final result = await logReader.getDailyPerformanceLog(logReader.now);
-          final List<PerformanceLog> logs =
-              result.map<PerformanceLog>((e) => e).toList();
-          final minMax = extent<PerformanceLog>(
-              logs,
-              (PerformanceLog a, PerformanceLog b) =>
-                  a.finishedTime.compareTo(b.finishedTime));
-          expect(minMax.min, result.first);
-          expect(minMax.max, result.last);
-          final index = (result.length / 2).ceil();
-          expect(
-              result
-                  .toList()[index]
-                  .finishedTime
-                  .isBefore(logs[index + 1].finishedTime),
-              isTrue);
+          final result = await logReader.listOfADay(logReader.now);
+          expect(areLogsSorted(result.toList()), isTrue);
         });
       });
     });
-    group('listOfLastSevenDays.', () {
+    group('listOfLastSevenDaysFrom.', () {
       group('With no data set', () {
         test('Empty Logs.', () async {
           logReader.now = DateTime.now();
-          final result = await logReader.listOfLastSevenDays(logReader.now);
+          final result = await logReader.listOfLastSevenDaysFrom(logReader.now);
           expect(result, isEmpty);
         });
       });
+
       group('With data set, across months and years.', () {
         DateTime lastMonth;
 
@@ -178,53 +170,39 @@ main() {
 
         test('Logs are all in last seven days (including boundary testing).',
             () async {
-          final result = await logReader.listOfLastSevenDays(logReader.now);
+          final result = await logReader.listOfLastSevenDaysFrom(logReader.now);
+
+          expect(result, isNotEmpty);
+
           final midnightOfSevenDaysAgo =
               midnightOf(logReader.now).subtract(const Duration(days: 7));
 
+          // From 12/29 to 1/4.
           for (final log in result) {
             expect(log.finishedTime.compareTo(midnightOfSevenDaysAgo),
                 isNonNegative);
             expect(log.finishedTime.compareTo(logReader.now), isNegative);
           }
 
+          // 12/29
           expect(result.first.finishedTime.day == midnightOfSevenDaysAgo.day,
               isTrue);
+          // 1/4
           expect(result.last.finishedTime.day == logReader.now.day, isTrue);
-
+          // 12/31
           expect(
               () => result.firstWhere((log) =>
                   log.finishedTime.day ==
                   endingDayOfThisMonth(midnightOfSevenDaysAgo).day),
               returnsNormally);
-
+          // 1/1
           expect(() => result.firstWhere((log) => log.finishedTime.day == 1),
               returnsNormally);
         });
 
         test('Logs are sorted by day ascendant order.', () async {
-          final result = await logReader.listOfLastSevenDays(logReader.now);
-
-          final minMax = extent<PerformanceLog>(
-              result, (a, b) => a.finishedTime.compareTo(b.finishedTime));
-          expect(minMax.min, result.first);
-          expect(minMax.max, result.last);
-
-          final lastMonthDataSet = result.takeWhile((log) =>
-              log.finishedTime.day == endingDayOfThisMonth(lastMonth).day);
-          expect(
-              listsEqual(
-                  lastMonthDataSet.map((e) => e.finishedTime).toList()..sort(),
-                  lastMonthDataSet.map((e) => e.finishedTime).toList()),
-              isTrue);
-
-          final thisMonthDataSet = result.skipWhile((log) =>
-              log.finishedTime.day == endingDayOfThisMonth(lastMonth).day);
-          expect(
-              listsEqual(
-                  thisMonthDataSet.map((e) => e.finishedTime).toList()..sort(),
-                  thisMonthDataSet.map((e) => e.finishedTime).toList()),
-              isTrue);
+          final result = await logReader.listOfLastSevenDaysFrom(logReader.now);
+          expect(areLogsSorted(result.toList()), isTrue);
         });
       });
     });
@@ -240,15 +218,44 @@ main() {
         });
       });
       group('With data set.', () {
-        setUp(() {});
-        test('Logs are all in this month (including boundary testing).',
-            () async {
-          // TODO: TBE.
-        }, skip: true);
+        setUp(() async {
+          logReader.now = DateTime(2020, 2, 28);
+          final dataSet =
+              generator.maximumDataSetOfMonth(logReader.now, untilNow: true);
+          await repository.set(logReader.now, dataSet);
 
+          final lastMonthDataSet = generator.maximumDataSetOfMonth(
+              beginningDayOfLastMonth(logReader.now),
+              untilNow: false);
+          await repository.set(
+              beginningDayOfLastMonth(logReader.now), lastMonthDataSet);
+
+          final nextMonthDataSet = generator.maximumDataSetOfMonth(
+              beginningDayOfNextMonth(logReader.now),
+              untilNow: false);
+          await repository.set(
+              beginningDayOfLastMonth(logReader.now), nextMonthDataSet);
+        });
+        test('Logs are all in this month.', () async {
+          final result = await logReader.listOfThisMonth(logReader.now);
+
+          expect(result, isNotEmpty);
+
+          for (final log in result) {
+            expect(
+                log.finishedTime
+                    .compareTo(beginningDayOfThisMonth(logReader.now)),
+                isNonNegative);
+            expect(
+                log.finishedTime
+                    .compareTo(beginningDayOfNextMonth(logReader.now)),
+                isNegative);
+          }
+        });
         test('Logs are sorted by day ascendant order.', () async {
-          // TODO: TBE.
-        }, skip: true);
+          final result = await logReader.listOfThisMonth(logReader.now);
+          expect(areLogsSorted(result.toList()), isTrue);
+        });
       });
     });
 
@@ -259,6 +266,7 @@ main() {
         final today = DateTime(2020, 2, 4);
         logReader.now = today;
 
+        final feb = beginningDayOfThisMonth(today);
         final jan = beginningDayOfLastMonth(today);
         // Across year.
         final dec = beginningDayOfLastMonth(jan);
@@ -266,31 +274,122 @@ main() {
         final jun = DateTime(oct.year, oct.month - 4, 1);
         // Oldest month.
         final mar = DateTime(jun.year, jun.month - 3, 1);
+        // Out of the range.
+        final lastFebEnding =
+            midnightOf(mar).subtract(const Duration(microseconds: 1));
 
         monthsWithData = [jan, dec, oct, jun, mar];
-        await for (final month in Stream.fromIterable(monthsWithData)) {
-          await repository.set(month, generator.maximumDataSetOfMonth(month));
+        for (final month in monthsWithData) {
+          await repository.set(month, [PerformanceLog(month, 50)]);
         }
+        // 2 data sets where they are not to be found.
+        await repository.set(feb, [PerformanceLog(feb, 50)]);
+        await repository
+            .set(lastFebEnding, [PerformanceLog(lastFebEnding, 50)]);
       });
-      test('11 lists of monthly Log, each is empty if no data set.', () async {
+      test(
+          '11 lists of monthly Log, from one month ago to 11 month ago,'
+          'each is empty if no data set.', () async {
         final result = await logReader.listOfRest();
         expect(result.length, 11);
 
         final months = monthsWithData.map((e) => e.month);
         expect(
             result
-                .where((e) => months.contains(e.dateTime.month))
-                .every((e) => e.isNotEmpty),
+                .where((logs) => months.contains(logs.dateTime.month))
+                .every((logs) => logs.isNotEmpty),
             isTrue);
         expect(
             result
-                .where((e) => !months.contains(e.dateTime.month))
-                .every((e) => e.isEmpty),
+                .where((logs) => !months.contains(logs.dateTime.month))
+                .every((logs) => logs.isEmpty),
             isTrue);
+        final foundMonths = result.map((logs) => logs.dateTime.month);
+        // 2 data sets of feb and last feb are not found.
+        expect(foundMonths, isNot(contains(2)));
       });
     });
+
     group('restExists.', () {
-      // TODO: TBE.
+      group(
+          'When at least one log is found'
+          'from the end of one month ago to the beginning of 11 month ago.',
+          () {
+        DateTime thisMonthBeginning;
+        setUp(() async {
+          final today = DateTime(2020, 2, 4);
+          logReader.now = today;
+
+          thisMonthBeginning = midnightOf(beginningDayOfThisMonth(today));
+          final onYearAgoEnding = midnightOf(beginningDayOfThisMonth(DateTime(
+                  thisMonthBeginning.year,
+                  thisMonthBeginning.month - 11,
+                  thisMonthBeginning.day)))
+              .subtract(const Duration(microseconds: 1));
+          // 2 boundary data sets where they are not to be found.
+          await repository.set(
+              thisMonthBeginning, [PerformanceLog(thisMonthBeginning, 50)]);
+          await repository
+              .set(onYearAgoEnding, [PerformanceLog(onYearAgoEnding, 50)]);
+        });
+        test('Returns false when no logs found', () {
+          expect(logReader.restExists(), completion(isFalse));
+        });
+        group('Cases of true.', () {
+          Future<void> generateDataSet({@required int monthAgo}) async {
+            final dateTime = DateTime(thisMonthBeginning.year,
+                thisMonthBeginning.month - monthAgo, thisMonthBeginning.day);
+            await repository.set(dateTime, [PerformanceLog(dateTime, 50)]);
+          }
+
+          test('With 1 month ago boundary data.', () async {
+            final dateTime =
+                thisMonthBeginning.subtract(const Duration(microseconds: 1));
+            await repository.set(dateTime, [PerformanceLog(dateTime, 50)]);
+            expect(logReader.restExists(), completion(isTrue));
+          });
+          test('With 2 month ago data.', () async {
+            await generateDataSet(monthAgo: 2);
+            expect(logReader.restExists(), completion(isTrue));
+          });
+          test('With 3 month ago data.', () async {
+            await generateDataSet(monthAgo: 3);
+            expect(logReader.restExists(), completion(isTrue));
+          });
+          test('With 4 month ago data.', () async {
+            await generateDataSet(monthAgo: 4);
+            expect(logReader.restExists(), completion(isTrue));
+          });
+          test('With 5 month ago data.', () async {
+            await generateDataSet(monthAgo: 5);
+            expect(logReader.restExists(), completion(isTrue));
+          });
+          test('With 6 month ago data.', () async {
+            await generateDataSet(monthAgo: 6);
+            expect(logReader.restExists(), completion(isTrue));
+          });
+          test('With 7 month ago data.', () async {
+            await generateDataSet(monthAgo: 7);
+            expect(logReader.restExists(), completion(isTrue));
+          });
+          test('With 8 month ago data.', () async {
+            await generateDataSet(monthAgo: 8);
+            expect(logReader.restExists(), completion(isTrue));
+          });
+          test('With 9 month ago data.', () async {
+            await generateDataSet(monthAgo: 9);
+            expect(logReader.restExists(), completion(isTrue));
+          });
+          test('With 10 month ago data.', () async {
+            await generateDataSet(monthAgo: 10);
+            expect(logReader.restExists(), completion(isTrue));
+          });
+          test('With 11 month ago boundary data.', () async {
+            await generateDataSet(monthAgo: 11);
+            expect(logReader.restExists(), completion(isTrue));
+          });
+        });
+      });
     });
   });
 

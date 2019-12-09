@@ -20,8 +20,8 @@ class LogReader {
     final _now = now;
     // Not using Future.wait but awaiting for each,
     // for the cache hitting in the repository.
-    return RecentLogs(await getDailyPerformanceLog(_now),
-        await listOfLastSevenDays(_now), await listOfThisMonth(_now));
+    return RecentLogs(await listOfADay(_now),
+        await listOfLastSevenDaysFrom(_now), await listOfThisMonth(_now));
   }
 
   Future<List<PerformanceLogs>> listOfRest() async {
@@ -36,12 +36,11 @@ class LogReader {
 
   Future<bool> restExists() async {
     final _now = now;
-    final beginningDayOf13MonthsAgo =
-        beginningDayOfLastMonth(DateTime(_now.year - 1, _now.month, 1));
-    var exists = false;
+    final beginningDayOf12MonthsAgo = DateTime(_now.year - 1, _now.month, 1);
     var month = beginningDayOfLastMonth(_now);
+    var exists = false;
 
-    while (!exists && month.isAfter(beginningDayOf13MonthsAgo)) {
+    while (!exists && month.isAfter(beginningDayOf12MonthsAgo)) {
       exists = await _repository.exists(month);
       month = beginningDayOfLastMonth(month);
     }
@@ -53,23 +52,20 @@ class LogReader {
   DateTime get now => DateTime.now();
 
   @visibleForTesting
-  Future<PerformanceLogs> getDailyPerformanceLog(DateTime day) async {
+  Future<PerformanceLogs> listOfADay(DateTime day) async {
     return PerformanceLogs(day, await _repository.listOfADay(day));
   }
 
   @visibleForTesting
-  Future<PerformanceLogs> listOfLastSevenDays(DateTime day) async {
-    return PerformanceLogs(day, await _repository.listOfLastSevenDays(day));
+  Future<PerformanceLogs> listOfLastSevenDaysFrom(DateTime day) async {
+    return PerformanceLogs(day, await _repository.listOfLastSevenDaysFrom(day));
   }
 
   @visibleForTesting
-  Future<PerformanceLogs> listOfThisMonth(DateTime day) {
+  Future<PerformanceLogs> listOfThisMonth(DateTime month) {
     return _listOfMonth(now, useCache: true);
   }
 
-  /// Listing logs in month.
-  ///
-  /// Logs are summarized by day, for better performance and chart looking.
   Future<PerformanceLogs> _listOfMonth(DateTime month,
       {useCache = false}) async {
     return PerformanceLogs(
@@ -94,7 +90,7 @@ class _Repository with PerformanceLogRepository {
         .toList();
   }
 
-  Future<List<PerformanceLog>> listOfLastSevenDays(DateTime now) async {
+  Future<List<PerformanceLog>> listOfLastSevenDaysFrom(DateTime now) async {
     final midnightOfSevenDaysAgo =
         midnightOf(now).subtract(const Duration(days: 7));
 
@@ -107,10 +103,9 @@ class _Repository with PerformanceLogRepository {
 
     if (midnightOfSevenDaysAgo.month != now.month) {
       final dataSet = await listOfMonth(midnightOfSevenDaysAgo);
-      final lastMonthResult = dataSet
-          .where((data) => data.finishedTime.isAfter(midnightOfSevenDaysAgo))
-          .toList();
-      result.insertAll(0, lastMonthResult);
+      final lastMonthDataSet = dataSet
+          .where((data) => data.finishedTime.isAfter(midnightOfSevenDaysAgo));
+      result.insertAll(0, lastMonthDataSet);
     }
 
     return result;
