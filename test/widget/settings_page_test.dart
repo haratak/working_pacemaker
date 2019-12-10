@@ -52,11 +52,11 @@ void main() {
           .thenAnswer((_) => Stream.value(breakingDurationOptions.first));
       when(subject.workingDurationOptions).thenAnswer((_) =>
           workingDurationOptions
-              .map((e) => DurationOptionView(e, messages.minutes))
+              .map((e) => DurationOption(e, messages.minutes))
               .toList());
       when(subject.breakingDurationOptions).thenAnswer((_) =>
           breakingDurationOptions
-              .map((e) => DurationOptionView(e, messages.minutes))
+              .map((e) => DurationOption(e, messages.minutes))
               .toList());
     }
 

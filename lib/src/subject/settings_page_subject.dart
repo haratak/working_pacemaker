@@ -20,14 +20,14 @@ class SettingsPageSubject {
   Stream<Duration> get breakingDurations =>
       _pacemakerSettings.notifier.breakingDurations;
 
-  List<DurationOptionView> get workingDurationOptions =>
+  List<DurationOption> get workingDurationOptions =>
       _pacemakerSettings.workingDurationOptions
-          .map((e) => DurationOptionView(e, _messages.minutes))
+          .map((e) => DurationOption(e, _messages.minutes))
           .toList();
 
-  List<DurationOptionView> get breakingDurationOptions =>
+  List<DurationOption> get breakingDurationOptions =>
       _pacemakerSettings.breakingDurationOptions
-          .map((e) => DurationOptionView(e, _messages.minutes))
+          .map((e) => DurationOption(e, _messages.minutes))
           .toList();
 
   void changeWorkingDuration(Duration duration) =>
@@ -37,10 +37,10 @@ class SettingsPageSubject {
       _pacemakerSettings.changeBreakingDuration(duration);
 }
 
-class DurationOptionView {
+class DurationOption {
   final String text;
   final Duration value;
-  DurationOptionView(this.value, String Function(int minutes) localize)
+  DurationOption(this.value, String Function(int minutes) localize)
       : text = _durationToMinutesText(value, localize);
 
   static String _durationToMinutesText(

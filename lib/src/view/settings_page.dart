@@ -62,7 +62,7 @@ class SettingsPage extends StatelessWidget {
   Future<void> _showDurationOptionsDialog(BuildContext context,
       {@required String dialogTitle,
       @required Stream<Duration> selectedDurations,
-      @required List<DurationOptionView> options,
+      @required List<DurationOption> options,
       @required void onChanged(Duration value)}) {
     final dialogCloseDelay = const Duration(milliseconds: 500);
     return showDialog<Duration>(
