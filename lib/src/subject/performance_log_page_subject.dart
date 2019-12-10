@@ -13,14 +13,14 @@ import 'package:working_pacemaker/src/platform/platform.dart';
 @immutable
 class PerformanceLogPageSubject {
   final _listRestController =
-      BehaviorSubject<UnmodifiableListView<ChartView>>();
+      BehaviorSubject<UnmodifiableListView<ChartDataSet>>();
   final _showViewAllLogsButtonController = BehaviorSubject<bool>.seeded(false);
-  final _viewAllLogsButtonPressedController = StreamController<void>();
-  final _resentLogsController = BehaviorSubject<RecentChartViews>();
+  final _showAllLogsButtonPressedController = StreamController<void>();
+  final _resentLogsController = BehaviorSubject<RecentChartDateSets>();
 
   final List<StreamController> _controllers = [];
 
-  final _ChartPresenter _presenter;
+  final _ChartDataSetPresenter _presenter;
   final LogReader _logReader;
   final Analytics _analytics;
 
@@ -28,16 +28,16 @@ class PerformanceLogPageSubject {
       {@required LogReader performanceLogReader,
       @required AppMessages messages,
       @required Analytics analytics})
-      : _presenter = _ChartPresenter(messages),
+      : _presenter = _ChartDataSetPresenter(messages),
         _logReader = performanceLogReader,
         _analytics = analytics {
     _controllers.addAll([
       _listRestController,
       _showViewAllLogsButtonController,
-      _viewAllLogsButtonPressedController,
+      _showAllLogsButtonPressedController,
       _resentLogsController,
     ]);
-    _viewAllLogsButtonPressedController.stream
+    _showAllLogsButtonPressedController.stream
         .tap((_) => _analytics.logEvent(name: 'view_all_logs_button_pressed'))
         .listen((_) => _listRest());
     _listResentLogs();
@@ -45,26 +45,21 @@ class PerformanceLogPageSubject {
   }
 
   Sink<void> get showAllLogsButtonPressed =>
-      _viewAllLogsButtonPressedController.sink;
-
-  Stream<RecentChartViews> get _recentLogs => _resentLogsController.stream;
-  Stream<ChartView> get today => _recentLogs.map((e) => e.today);
-  Stream<ChartView> get lastSevenDays =>
+      _showAllLogsButtonPressedController.sink;
+  Stream<ChartDataSet> get today => _recentLogs.map((e) => e.today);
+  Stream<ChartDataSet> get lastSevenDays =>
       _recentLogs.map((e) => e.lastSevenDays);
-  Stream<ChartView> get thisMonth => _recentLogs.map((e) => e.thisMonth);
-
+  Stream<ChartDataSet> get thisMonth => _recentLogs.map((e) => e.thisMonth);
   Stream<bool> get showViewAllLogsButton =>
       _showViewAllLogsButtonController.stream;
-
-  Stream<bool> get showListOfRest =>
-      _showViewAllLogsButtonController.stream.map((e) => !e);
-
-  Stream<UnmodifiableListView<ChartView>> get listOfRest =>
+  Stream<UnmodifiableListView<ChartDataSet>> get listOfRest =>
       _listRestController.stream;
 
   void dispose() {
     _controllers.forEach((c) => c.close());
   }
+
+  Stream<RecentChartDateSets> get _recentLogs => _resentLogsController.stream;
 
   void _listResentLogs() async {
     final recent = await _logReader.recent();
@@ -75,7 +70,7 @@ class PerformanceLogPageSubject {
     final thisMonth = _presenter.thisMonthChartView(recent.thisMonth);
 
     _resentLogsController
-        .add(RecentChartViews(today, lastSevenDays, thisMonth));
+        .add(RecentChartDateSets(today, lastSevenDays, thisMonth));
   }
 
   void _listRest() async {
@@ -88,11 +83,11 @@ class PerformanceLogPageSubject {
   }
 }
 
-class ChartView {
-  final String duration;
+class ChartDataSet {
+  final String period;
   final String totalWorkingTime;
   final UnmodifiableListView<ChartData> dataSet;
-  ChartView(this.duration, this.totalWorkingTime, this.dataSet);
+  ChartDataSet(this.period, this.totalWorkingTime, this.dataSet);
 }
 
 class ChartData {
@@ -103,37 +98,39 @@ class ChartData {
   ChartData.zero(this.time) : y = 0;
 }
 
-class RecentChartViews {
-  final ChartView today;
-  final ChartView lastSevenDays;
-  final ChartView thisMonth;
-  RecentChartViews(this.today, this.lastSevenDays, this.thisMonth);
+class RecentChartDateSets {
+  final ChartDataSet today;
+  final ChartDataSet lastSevenDays;
+  final ChartDataSet thisMonth;
+  RecentChartDateSets(this.today, this.lastSevenDays, this.thisMonth);
 }
 
-class _ChartPresenter {
+class _ChartDataSetPresenter {
   final AppMessages _messages;
 
-  _ChartPresenter(this._messages);
+  _ChartDataSetPresenter(this._messages);
 
-  ChartView todayChartView(PerformanceLogs todayLogs) {
-    return ChartView(_messages.today, _hoursMinutesFormat(_sum(todayLogs)),
+  ChartDataSet todayChartView(PerformanceLogs todayLogs) {
+    return ChartDataSet(_messages.today, _hoursMinutesFormat(_sum(todayLogs)),
         UnmodifiableListView(_toTodayChartDataSet(todayLogs)));
   }
 
-  ChartView lastSevenDaysChartView(PerformanceLogs lastSevenDaysLogs) {
-    return ChartView(
+  ChartDataSet lastSevenDaysChartView(PerformanceLogs lastSevenDaysLogs) {
+    return ChartDataSet(
         _messages.lastSevenDays,
         _hoursMinutesFormat(_sum(lastSevenDaysLogs)),
         UnmodifiableListView(_toLastSevenDaysChartDataSet(lastSevenDaysLogs)));
   }
 
-  ChartView thisMonthChartView(PerformanceLogs monthLogs) {
-    return ChartView(_messages.thisMonth, _hoursMinutesFormat(_sum(monthLogs)),
+  ChartDataSet thisMonthChartView(PerformanceLogs monthLogs) {
+    return ChartDataSet(
+        _messages.thisMonth,
+        _hoursMinutesFormat(_sum(monthLogs)),
         UnmodifiableListView(_toMonthChartDataSet(monthLogs)));
   }
 
-  ChartView pastMonthChartView(PerformanceLogs monthLogs) {
-    return ChartView(
+  ChartDataSet pastMonthChartView(PerformanceLogs monthLogs) {
+    return ChartDataSet(
         _messages.month(monthLogs.dateTime),
         _hoursMinutesFormat(_sum(monthLogs)),
         UnmodifiableListView(_toMonthChartDataSet(monthLogs)));
@@ -144,7 +141,7 @@ class _ChartPresenter {
     // TODO: how to render chart x axis nicely with no data set?
     return UnmodifiableListView([
       ChartData.zero(midnightOf(todayLogs.dateTime)),
-      ...todayLogs.map((e) => ChartData(e.finishedTime, e.minutes)).toList(),
+      ...todayLogs.map((e) => ChartData(e.finishedTime, e.minutes)),
       ChartData.zero(tomorrowMidnightOf(todayLogs.dateTime))
     ]);
   }
@@ -155,10 +152,11 @@ class _ChartPresenter {
         .map((e) => ChartData(e.day, e.totalWorkingDuration.inHours))
         .toList();
 
-    final today = midnightOf(lastSevenDaysLogs.dateTime);
+    final beginningDay = midnightOf(lastSevenDaysLogs.dateTime)
+        .subtract(const Duration(days: 6));
     // Data set with ChartData.zero interpolated at every no data day.
     final resultDataSet = List.generate(7, (index) {
-      final day = today.subtract(Duration(days: index));
+      final day = beginningDay.add(Duration(days: index));
       return dataSet.firstWhere((data) => data.time == day,
           orElse: () => ChartData.zero(day));
     });
@@ -172,14 +170,14 @@ class _ChartPresenter {
         .map((e) => ChartData(e.day, e.totalWorkingDuration.inHours))
         .toList();
 
-    final endingDay = endingDayOfThisMonth(monthLogs.dateTime);
+    final beginningDay = beginningDayOfThisMonth(monthLogs.dateTime);
     // Data set with ChartData.zero interpolated at every no data day.
-    final resultDataSet = List.generate(endingDay.day, (index) {
-      final day = endingDay.subtract(Duration(days: index));
+    final resultDataSet =
+        List.generate(endingDayOfThisMonth(monthLogs.dateTime).day, (index) {
+      final day = beginningDay.add(Duration(days: index));
       return dataSet.firstWhere((data) => data.time == day,
           orElse: () => ChartData.zero(day));
     });
-
     return UnmodifiableListView(resultDataSet);
   }
 

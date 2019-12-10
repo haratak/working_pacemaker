@@ -1,15 +1,16 @@
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
-import 'package:working_pacemaker/src/subject/performance_log_page_subject.dart';
+import 'package:working_pacemaker/src/subject/performance_log_page_subject.dart'
+    show ChartDataSet, ChartData;
 
 class PerformanceChartContent extends StatelessWidget {
-  final ChartView _chartView;
+  final ChartDataSet _dataSet;
 
   PerformanceChartContent({
     Key key,
-    @required ChartView chartView,
-  })  : assert(chartView != null),
-        _chartView = chartView,
+    @required ChartDataSet dataSet,
+  })  : assert(dataSet != null),
+        _dataSet = dataSet,
         super(key: key);
 
   @override
@@ -27,13 +28,13 @@ class PerformanceChartContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('${_chartView.duration}',
+                Text('${_dataSet.period}',
                     style: theme.textTheme.subhead
                         .copyWith(color: theme.accentColor)),
                 Padding(
                   padding: const EdgeInsets.only(left: 4, right: 20),
                   child: Text(
-                    '${_chartView.totalWorkingTime}',
+                    '${_dataSet.totalWorkingTime}',
                     style: theme.textTheme.headline.copyWith(
                         fontSize: 36,
                         color: theme.primaryColor,
@@ -54,7 +55,7 @@ class PerformanceChartContent extends StatelessWidget {
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Container();
               return Expanded(
-                child: PerformanceChart(_chartView.dataSet),
+                child: PerformanceChart(_dataSet.dataSet),
               );
             },
           ),

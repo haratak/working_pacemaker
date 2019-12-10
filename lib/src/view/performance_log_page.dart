@@ -20,37 +20,37 @@ class PerformanceLogPage extends StatelessWidget {
               SliverFixedExtentList(
                 delegate: SliverChildListDelegate([
                   Card(
-                    child: StreamBuilder<ChartView>(
+                    child: StreamBuilder<ChartDataSet>(
                       stream: subject.today,
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) return Container();
 
                         return PerformanceChartContent(
-                          chartView: snapshot.data,
+                          dataSet: snapshot.data,
                         );
                       },
                     ),
                   ),
                   Card(
-                    child: StreamBuilder<ChartView>(
+                    child: StreamBuilder<ChartDataSet>(
                       stream: subject.lastSevenDays,
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) return Container();
 
                         return PerformanceChartContent(
-                          chartView: snapshot.data,
+                          dataSet: snapshot.data,
                         );
                       },
                     ),
                   ),
                   Card(
-                    child: StreamBuilder<ChartView>(
+                    child: StreamBuilder<ChartDataSet>(
                       stream: subject.thisMonth,
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) return Container();
 
                         return PerformanceChartContent(
-                          chartView: snapshot.data,
+                          dataSet: snapshot.data,
                         );
                       },
                     ),
@@ -58,15 +58,15 @@ class PerformanceLogPage extends StatelessWidget {
                 ]),
                 itemExtent: 280,
               ),
-              StreamBuilder<UnmodifiableListView<ChartView>>(
+              StreamBuilder<UnmodifiableListView<ChartDataSet>>(
                 stream: subject.listOfRest,
                 initialData: UnmodifiableListView([]),
                 builder: (context, snapshot) {
                   final listItems = snapshot.data
                       .map(
-                        (chartView) => Card(
+                        (dataSet) => Card(
                           child: PerformanceChartContent(
-                            chartView: chartView,
+                            dataSet: dataSet,
                           ),
                         ),
                       )

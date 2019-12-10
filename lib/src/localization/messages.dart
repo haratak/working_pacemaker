@@ -7,22 +7,17 @@
 library messages;
 
 import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
 
 /// Flutter independent localizing messages module.
-class AppMessages with LocaleCapability, AppMessagesMixin {
-  @protected
-  final String locale;
-
-  AppMessages(this.locale) : assert(locale != null);
+class AppMessages with AppMessagesMixin {
+  AppMessages([String locale]) {
+    if (locale != null) {
+      Intl.defaultLocale = locale;
+    }
+  }
 }
 
-/// Explicitly specify locale rather than the one of ambient dependency.
-mixin LocaleCapability {
-  String get locale;
-}
-
-mixin AppMessagesMixin on LocaleCapability {
+mixin AppMessagesMixin {
   // For home page.
   String get workingPhase => Intl.message('Working');
   String get breakingPhase => Intl.message('Breaking');
@@ -46,7 +41,7 @@ mixin AppMessagesMixin on LocaleCapability {
   String get lastSevenDays => Intl.message('Seven Days');
   String get thisMonth => Intl.message('This Month');
   String month(DateTime date) =>
-      DateFormat(DateFormat.MONTH, locale).format(date);
+      DateFormat(DateFormat.MONTH, Intl.defaultLocale).format(date);
   String get showAllLogs => Intl.message('Show All Logs');
   String get logKeepingInformation =>
       Intl.message('Logs will be kept for a period of one year.');

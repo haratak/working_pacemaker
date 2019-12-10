@@ -12,12 +12,7 @@ final List<Locale> supportedLocales =
 const List<String> _supportedLanguageCodes = ['en', 'ja'];
 
 /// Application-wide localization.
-class AppLocalizations with LocaleCapability, AppMessagesMixin {
-  @protected
-  final String locale;
-
-  AppLocalizations._(this.locale);
-
+class AppLocalizations with AppMessagesMixin {
   static Future<AppLocalizations> load(Locale locale) async {
     final name = locale.countryCode == null || locale.countryCode.isEmpty
         ? locale.languageCode
@@ -27,7 +22,7 @@ class AppLocalizations with LocaleCapability, AppMessagesMixin {
     await initializeMessages(localeName);
     Intl.defaultLocale = localeName;
 
-    return AppLocalizations._(localeName);
+    return AppLocalizations();
   }
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
