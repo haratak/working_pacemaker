@@ -13,4 +13,4 @@ AppLocalizations l(BuildContext context) =>
 /// This is useful for framework independent modules,
 /// since [Locale] is a part of Flutter.
 String locale(BuildContext context) =>
-    Localizations.localeOf(context).toLanguageTag();
+    Localizations.localeOf(context).languageCode;
