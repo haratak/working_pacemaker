@@ -22,7 +22,7 @@ flutter run --target='lib/main_production.dart'
 
 ## For Web
 
-**Flutter master branch may be necessary for building this app.**
+**Flutter Web Support is required. (As of 14 Dec, beta channel or higher.)**
 
 ### Dev
 
