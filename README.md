@@ -4,6 +4,10 @@ A Flutter demo application for mobile and web.
 
 ## For Mobile (iOS and Android)
 
+### Prerequisites
+
+**Firebase analytics setup is necessary before building this app.**
+
 ### Dev
 
 ```
@@ -15,8 +19,6 @@ flutter run --target='lib/main_dev.dart'
 ```
 flutter run --target='lib/main_production.dart'
 ```
-
-**A `google-services.json` for Firebase is required to run.**
 
 ## For Web
 
