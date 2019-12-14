@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:pedantic/pedantic.dart';
-import 'package:stream_transform/stream_transform.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:working_pacemaker/src/model/pacemaker.dart';
 import 'package:working_pacemaker/src/platform/platform.dart';
 import 'package:working_pacemaker/src/view/theme_data.dart';
@@ -23,7 +23,7 @@ class HomePageSubject {
         _pacemaker = pacemaker,
         _analytics = analytics {
     _fabPressedController.stream
-        .tap((_) =>
+        .doOnEach((_) =>
             unawaited(_analytics.logEvent(name: 'home_page_fab_is_pressed')))
         .forEach(_pacemaker.startOrToggle.add);
   }
@@ -37,7 +37,7 @@ class HomePageSubject {
       e == Phase.working ? workingPhaseThemeData : breakingPhaseThemeData);
 
   Stream<double> get backgroundGradientYLerp =>
-      _pacemaker.percents.throttle(backgroundGradientYLerpThrottleDuration);
+      _pacemaker.percents.throttleTime(backgroundGradientYLerpThrottleDuration);
 
   void dispose() {
     _fabPressedController.close();

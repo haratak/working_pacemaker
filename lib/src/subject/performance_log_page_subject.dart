@@ -4,7 +4,6 @@ import 'dart:collection';
 import "package:collection/collection.dart";
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_transform/stream_transform.dart';
 import 'package:working_pacemaker/src/localization/messages.dart';
 import 'package:working_pacemaker/src/model/performance_logging.dart';
 import 'package:working_pacemaker/src/model/performance_logging/date_time_helper.dart';
@@ -38,7 +37,8 @@ class PerformanceLogPageSubject {
       _resentLogsController,
     ]);
     _showAllLogsButtonPressedController.stream
-        .tap((_) => _analytics.logEvent(name: 'view_all_logs_button_pressed'))
+        .doOnData(
+            (_) => _analytics.logEvent(name: 'view_all_logs_button_pressed'))
         .listen((_) => _listRest());
     _listResentLogs();
     _logReader.restExists().then(_showViewAllLogsButtonController.add);

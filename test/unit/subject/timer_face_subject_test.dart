@@ -164,9 +164,7 @@ void main() {
           ' ${TimerLifecycleState.paused}, with delay.', () {
         when(pacemaker.lifecycleStates)
             .thenAnswer((_) => Stream.value(TimerLifecycleState.paused));
-        Observable(subject.canShowResetButton)
-            .timeInterval()
-            .listen(expectAsync1((result) {
+        subject.canShowResetButton.timeInterval().listen(expectAsync1((result) {
           expect(result.value, isTrue);
           expect(
               result.interval.inMilliseconds,
@@ -176,9 +174,7 @@ void main() {
 
         when(pacemaker.lifecycleStates)
             .thenAnswer((_) => Stream.value(TimerLifecycleState.initial));
-        Observable(subject.canShowResetButton)
-            .timeInterval()
-            .listen(expectAsync1((result) {
+        subject.canShowResetButton.timeInterval().listen(expectAsync1((result) {
           expect(result.value, isFalse);
           expect(
               result.interval.inMilliseconds,
@@ -188,9 +184,7 @@ void main() {
 
         when(pacemaker.lifecycleStates)
             .thenAnswer((_) => Stream.value(TimerLifecycleState.running));
-        Observable(subject.canShowResetButton)
-            .timeInterval()
-            .listen(expectAsync1((result) {
+        subject.canShowResetButton.timeInterval().listen(expectAsync1((result) {
           expect(result.value, isFalse);
           expect(
               result.interval.inMilliseconds,
@@ -200,9 +194,7 @@ void main() {
 
         when(pacemaker.lifecycleStates)
             .thenAnswer((_) => Stream.value(TimerLifecycleState.finished));
-        Observable(subject.canShowResetButton)
-            .timeInterval()
-            .listen(expectAsync1((result) {
+        subject.canShowResetButton.timeInterval().listen(expectAsync1((result) {
           expect(result.value, isFalse);
           expect(
               result.interval.inMilliseconds,

@@ -99,7 +99,7 @@ class Pacemaker {
     _resetController.close();
   }
 
-  Stream get _lifecycleStatesChanged => Observable(lifecycleStates)
+  Stream get _lifecycleStatesChanged => lifecycleStates
       .pairwise()
       .firstWhere((pair) => pair.first != pair.last)
       .asStream();
